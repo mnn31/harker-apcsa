@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Flame, RotateCcw, Trophy } from "lucide-react";
+import { ArrowLeft, ArrowRight, Flame, Infinity as InfinityIcon, RotateCcw, Trophy } from "lucide-react";
 import { McqCard } from "@/components/mcq-card";
 import { QUESTIONS, type Question } from "@/lib/questions";
 import { UNITS } from "@/lib/curriculum";
+import { GENERATORS, generateOne } from "@/lib/generators";
 import { cn } from "@/lib/utils";
 
 type Stats = {
@@ -63,6 +64,9 @@ export function PracticeClient() {
   const searchParams = useSearchParams();
   const unitFilter = searchParams.get("unit") || undefined;
   const tagFilter = searchParams.get("tag") || undefined;
+  // "endless" = mix in procedurally-generated questions (default ON).
+  // ?mode=curated turns this off and only uses hand-written questions.
+  const endless = (searchParams.get("mode") || "endless") !== "curated";
 
   const pool = useMemo(() => {
     let p = QUESTIONS;
@@ -71,29 +75,67 @@ export function PracticeClient() {
     return p;
   }, [unitFilter, tagFilter]);
 
+  // How often to inject a generated question vs serve a hand-written one.
+  // Higher = more novel, less recall of curated traps. 0.65 keeps things
+  // mostly fresh while still surfacing curated questions for retention.
+  const generatedShare = endless ? 0.65 : 0;
+
   const [stats, setStats] = useState<Stats>(empty);
   const [history, setHistory] = useState<string[]>([]);
   const [current, setCurrent] = useState<Question | null>(null);
   const [streak, setStreak] = useState(0);
   const [completed, setCompleted] = useState(0);
+  // Monotonic seed for the generator so we never repeat within a session.
+  const [seed, setSeed] = useState(() => Math.floor(Math.random() * 100000));
 
   useEffect(() => {
     setStats(loadStats());
   }, []);
 
+  // Pull the next question — either curated (ranked by adaptive weights) or generated.
+  const pickNext = (
+    poolToUse: Question[],
+    statsNow: Stats,
+    historyNow: string[],
+    seedNow: number
+  ): Question | null => {
+    const wantGenerated = generatedShare > 0 && Math.random() < generatedShare;
+    if (wantGenerated) {
+      const filter = unitFilter ? { unitId: unitFilter } : undefined;
+      const candidates = unitFilter
+        ? GENERATORS.filter((g) => g.unitId === unitFilter)
+        : GENERATORS;
+      if (candidates.length > 0) {
+        const q = generateOne(seedNow, filter);
+        if (q && (!tagFilter || q.trapTags.includes(tagFilter))) return q;
+      }
+    }
+    const ranked = rankQuestions(poolToUse, statsNow, historyNow);
+    return ranked[0] ?? null;
+  };
+
+  // Pick a question only when there isn't one (or filters change).
+  // Stats updates do NOT re-rank — that would swap the card mid-read.
   useEffect(() => {
-    if (pool.length === 0) {
+    if (pool.length === 0 && !endless) {
       setCurrent(null);
       return;
     }
-    const ranked = rankQuestions(pool, stats, history);
-    setCurrent(ranked[0]);
-  }, [pool, stats, history]);
+    setCurrent((cur) => {
+      if (cur) return cur;
+      return pickNext(pool, loadStats(), [], seed);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pool, endless]);
 
   const advance = () => {
     if (!current) return;
-    setHistory((h) => [current.id, ...h].slice(0, 6));
+    const newHistory = [current.id, ...history].slice(0, 8);
+    const newSeed = seed + Math.floor(Math.random() * 1000) + 1;
+    setHistory(newHistory);
+    setSeed(newSeed);
     setCompleted((c) => c + 1);
+    setCurrent(pickNext(pool, stats, newHistory, newSeed));
   };
 
   const onResolve = (firstTry: boolean) => {
@@ -109,7 +151,6 @@ export function PracticeClient() {
       return next;
     });
     setStreak((s) => (firstTry ? s + 1 : 0));
-    setTimeout(advance, 1500);
   };
 
   const onMissTag = (tags: string[]) => {
@@ -152,13 +193,45 @@ export function PracticeClient() {
         )}
       </div>
 
-      <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-slate-900 mb-2 leading-tight">
-        {unit ? `Practice: ${unit.title}` : "Mixed practice"}
-      </h1>
-      <p className="text-slate-600 text-lg max-w-2xl mb-8">
-        Adaptive set. Wrong answers nudge you toward the right one — and the
-        questions you struggle with come back more often.
+      <div className="flex items-end gap-3 flex-wrap mb-2">
+        <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-slate-900 leading-tight">
+          {unit ? `Practice: ${unit.title}` : endless ? "Endless practice" : "Curated practice"}
+        </h1>
+        {endless && (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-100 text-violet-800 text-[11px] font-bold uppercase tracking-widest">
+            <InfinityIcon className="w-3 h-3" /> mixed pool
+          </span>
+        )}
+      </div>
+      <p className="text-slate-600 text-lg max-w-2xl mb-4">
+        {endless
+          ? "Curated questions and freshly-generated trace problems mix together. The pool never runs out — keep going as long as you want."
+          : "Curated questions only. Wrong answers nudge you toward the right one; questions you miss come back more often."}
       </p>
+      <div className="flex items-center gap-2 text-xs font-semibold mb-8">
+        <a
+          href={`/practice${unit ? `?unit=${unit.id}` : ""}`}
+          className={cn(
+            "px-3 py-1.5 rounded-full",
+            endless
+              ? "bg-slate-900 text-white"
+              : "bg-white border border-slate-200 text-slate-700 hover:border-indigo-300"
+          )}
+        >
+          Endless
+        </a>
+        <a
+          href={`/practice?${unit ? `unit=${unit.id}&` : ""}mode=curated`}
+          className={cn(
+            "px-3 py-1.5 rounded-full",
+            !endless
+              ? "bg-slate-900 text-white"
+              : "bg-white border border-slate-200 text-slate-700 hover:border-indigo-300"
+          )}
+        >
+          Curated only
+        </a>
+      </div>
 
       <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
         <StatCard
@@ -187,11 +260,12 @@ export function PracticeClient() {
             key={current.id + completed}
             q={current}
             index={completed}
-            total={pool.length}
+            total={endless ? undefined : pool.length}
             onResolve={(firstTry) => {
               if (!firstTry) onMissTag(current.trapTags);
               onResolve(firstTry);
             }}
+            onNext={advance}
           />
         ) : (
           <motion.div

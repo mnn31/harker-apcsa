@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { GraduationCap, Layers, Sparkles, Target } from "lucide-react";
+import { GraduationCap, Layers, PenLine, Sparkles, Target } from "lucide-react";
 import { UNITS } from "@/lib/curriculum";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,7 @@ export function SiteNav() {
   const pathname = usePathname();
   const onUnit = (id: string) => pathname?.startsWith(`/units/${id}`);
   const onPractice = pathname?.startsWith("/practice");
+  const onFRQs = pathname?.startsWith("/frqs");
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-white/70 border-b border-white/60">
@@ -59,9 +60,21 @@ export function SiteNav() {
             </Link>
           ))}
           <Link
+            href="/frqs"
+            className={cn(
+              "ml-2 px-3.5 py-2 rounded-2xl text-sm font-semibold flex items-center gap-1.5 transition-colors",
+              onFRQs
+                ? "bg-fuchsia-500 text-white"
+                : "text-slate-700 hover:text-fuchsia-700 hover:bg-fuchsia-50"
+            )}
+          >
+            <PenLine className="w-4 h-4" strokeWidth={2.4} />
+            FRQs
+          </Link>
+          <Link
             href="/practice"
             className={cn(
-              "ml-2 px-4 py-2 rounded-2xl text-sm font-semibold flex items-center gap-1.5 shadow-clay-sm transition-transform active:scale-[0.97]",
+              "ml-1 px-4 py-2 rounded-2xl text-sm font-semibold flex items-center gap-1.5 shadow-clay-sm transition-transform active:scale-[0.97]",
               onPractice
                 ? "bg-amber-400 text-slate-900"
                 : "bg-slate-900 text-white hover:bg-slate-800"

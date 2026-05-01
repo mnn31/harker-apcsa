@@ -19,9 +19,7 @@ export function TopicPractice({ questions }: { questions: Question[] }) {
           q={q}
           index={i}
           total={questions.length}
-          onResolve={() => {
-            setTimeout(next, 1200);
-          }}
+          onNext={questions.length > 1 ? next : undefined}
         />
       </AnimatePresence>
       {questions.length > 1 && (

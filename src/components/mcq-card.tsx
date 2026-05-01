@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, RotateCcw, Sparkles, AlertCircle } from "lucide-react";
+import { Check, RotateCcw, Sparkles, AlertCircle, ArrowRight } from "lucide-react";
 import type { Question } from "@/lib/questions";
 import { CodeBlock } from "@/components/code-block";
 import { cn } from "@/lib/utils";
@@ -16,11 +16,13 @@ type Outcome = {
 export function McqCard({
   q,
   onResolve,
+  onNext,
   index,
   total,
 }: {
   q: Question;
   onResolve?: (correctOnFirstTry: boolean) => void;
+  onNext?: () => void;
   index?: number;
   total?: number;
 }) {
@@ -173,18 +175,26 @@ export function McqCard({
         )}
       </AnimatePresence>
 
-      <div className="mt-5 flex items-center gap-2">
+      <div className="mt-6 pt-5 border-t border-slate-100 flex items-center gap-2">
         <button
           onClick={reset}
           className="text-xs font-semibold text-slate-500 hover:text-indigo-700 inline-flex items-center gap-1 px-3 py-1.5 rounded-xl hover:bg-indigo-50 transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          Try again
+          Reset
         </button>
-        <div className="ml-auto text-xs text-slate-400">
+        <div className="text-xs text-slate-400">
           {picks.filter((p) => p.state === "wrong").length} attempt
           {picks.filter((p) => p.state === "wrong").length === 1 ? "" : "s"}
         </div>
+        {solved && onNext && (
+          <button
+            onClick={onNext}
+            className="ml-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-sm font-semibold inline-flex items-center gap-1.5 shadow-clay-sm active:scale-[0.97]"
+          >
+            Next question <ArrowRight className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </motion.article>
   );

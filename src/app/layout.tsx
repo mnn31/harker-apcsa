@@ -20,9 +20,9 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Harker APCSA — score a 5",
+  title: "Harker APCSA",
   description:
-    "The Harker AP Computer Science A review hub. Adaptive practice, MCQs with intelligent feedback, and Barron-style teaching slides for every concept.",
+    "AP Computer Science A review hub for students of Ms. Anu Datar. Adaptive practice, MCQs with feedback, and teaching slides for every concept.",
 };
 
 export default function RootLayout({
@@ -35,9 +35,16 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
         <SiteNav />
         <main className="flex-1">{children}</main>
-        <footer className="px-6 py-10 text-center text-sm text-slate-500">
-          Built for Harker students · Review by unit · Practice with feedback ·
-          {" "}<span className="font-display text-indigo-700">Score a 5.</span>
+        <footer className="px-6 py-10 text-center text-sm text-slate-500 space-y-1">
+          <div>
+            AP Computer Science A · Course taught by{" "}
+            <span className="font-display font-semibold text-slate-700">
+              Ms. Anu Datar
+            </span>
+          </div>
+          <div className="text-xs">
+            Review hub for Harker students · Built with Next.js
+          </div>
         </footer>
       </body>
     </html>
