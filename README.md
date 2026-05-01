@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Harker APCSA
 
-## Getting Started
+The friendliest path to a 5 on the AP Computer Science A exam — built for
+Harker students.
 
-First, run the development server:
+A Next.js + Tailwind + Framer Motion review hub covering every topic on the
+redesigned 4-unit AP CSA exam, with Barron-style teaching slides and adaptive
+multiple-choice practice that **nudges** students past wrong answers instead of
+just marking them.
+
+## What's inside
+
+- **Landing page** — animated gradient hero, three feature blocks, unit grid
+- **4 units, 21 topics** — every concept on the redesigned APCSA course
+  - Unit 1: Using Objects and Methods (15–25%)
+  - Unit 2: Selection and Iteration (25–35%)
+  - Unit 3: Class Creation (10–18%)
+  - Unit 4: Data Collections (30–40%)
+- **Slide decks per topic** — Barron-style teaching slides with code, traps, and
+  key-idea callouts
+- **MCQ practice** — Each wrong answer triggers a *nudge*: tells the student
+  what trap they fell into without revealing the right choice
+- **Adaptive ordering** — Questions are weighted by the trap-tags you've missed.
+  Topics you struggle with come back more often.
+- **Local progress** — Streaks, first-try score, weak-spot tracking via
+  `localStorage`
+
+## Stack
+
+- Next.js 16 (App Router, static prerender of all routes)
+- Tailwind CSS v4
+- Framer Motion (every transition)
+- Lucide icons
+- Claymorphism + animated gradient mesh hero
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+Generates 33 static routes (home + practice + 4 unit pages + 21 topic pages +
+filtered practice variants).
 
-To learn more about Next.js, take a look at the following resources:
+## Project layout
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/
+│   ├── page.tsx                          # landing page
+│   ├── layout.tsx                        # fonts + nav
+│   ├── practice/page.tsx                 # /practice
+│   └── units/[unitId]/[topicId]/page.tsx # /units/u1/1-3, etc.
+├── components/
+│   ├── site-nav.tsx                      # animated tab nav
+│   ├── slide-deck.tsx                    # per-topic slides
+│   ├── mcq-card.tsx                      # nudge feedback engine
+│   ├── practice-client.tsx               # adaptive practice
+│   ├── code-block.tsx                    # mini Java syntax highlight
+│   └── unit-hero.tsx                     # unit landing
+└── lib/
+    ├── curriculum.ts                     # units, topics, slides
+    ├── questions.ts                      # MCQ bank with per-distractor nudges
+    └── utils.ts
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Adding more questions
 
-## Deploy on Vercel
+Edit `src/lib/questions.ts`. Each question has:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `prompt`, optional `code` block
+- `choices` — each wrong option carries a `nudge` that hints toward the trap
+- `correct` letter
+- `explanation` shown only after the student lands the right answer
+- `trapTags` — fuel for the adaptive engine

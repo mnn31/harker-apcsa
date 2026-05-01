@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-primary: #2563EB;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #7C3AED;
+  --color-accent: #F59E0B;
+  --color-bg: #EFF6FF;
+  --color-fg: #0F172A;
+  --color-muted: #F1F5FD;
+  --color-border: #E4ECFC;
+  --color-destructive: #DC2626;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-fg);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+html, body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, h5, .font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Clay-soft drop shadow */
+.shadow-clay {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.7) inset,
+    0 -2px 0 rgba(0,0,0,0.04) inset,
+    0 16px 32px -12px rgba(37, 99, 235, 0.18),
+    0 4px 12px -4px rgba(124, 58, 237, 0.12);
+}
+
+.shadow-clay-sm {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 -1px 0 rgba(0,0,0,0.04) inset,
+    0 8px 18px -8px rgba(37, 99, 235, 0.18);
+}
+
+.shadow-clay-lg {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.7) inset,
+    0 -3px 0 rgba(0,0,0,0.05) inset,
+    0 28px 60px -20px rgba(37, 99, 235, 0.28),
+    0 12px 28px -10px rgba(124, 58, 237, 0.18);
+}
+
+/* Animated gradient mesh for hero */
+.gradient-mesh {
+  background:
+    radial-gradient(at 20% 20%, #C7D2FE 0%, transparent 55%),
+    radial-gradient(at 80% 10%, #FDE68A 0%, transparent 55%),
+    radial-gradient(at 80% 80%, #DDD6FE 0%, transparent 55%),
+    radial-gradient(at 20% 90%, #BFDBFE 0%, transparent 55%),
+    linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 100%);
+  background-size: 200% 200%;
+  animation: meshShift 18s ease-in-out infinite;
+}
+
+@keyframes meshShift {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 25px) scale(0.97); }
+}
+
+.blob {
+  animation: blob 16s ease-in-out infinite;
+  filter: blur(40px);
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradient-mesh, .blob { animation: none; }
+}
+
+/* Code block formatting */
+.code-block {
+  background: #0F172A;
+  color: #E2E8F0;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+button { font-family: inherit; }
+
+.scrollbar-thin::-webkit-scrollbar { height: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(37,99,235,0.18);
+  border-radius: 999px;
 }
