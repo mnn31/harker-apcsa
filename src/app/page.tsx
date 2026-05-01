@@ -233,6 +233,20 @@ export default function Home() {
           </Link>{" "}
           for adaptive review.
         </div>
+
+        <div className="mt-12 text-center text-xs text-slate-500">
+          Created by{" "}
+          <span className="font-display font-semibold text-slate-700">
+            Manan Gupta
+          </span>{" "}
+          ·{" "}
+          <a
+            href="mailto:27manang@students.harker.org"
+            className="text-indigo-700 hover:underline"
+          >
+            27manang@students.harker.org
+          </a>
+        </div>
       </section>
     </div>
   );
